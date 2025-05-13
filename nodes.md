@@ -1,0 +1,3 @@
+- JS Object vs JSON
+-Add the express.json middleware to your app.
+- Make your singup API dynamic to recive the data from the end user.
