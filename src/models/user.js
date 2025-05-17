@@ -43,6 +43,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "Hi i am default value ",
     },
+    skills: {
+      type: [String],
+    },
   },
   {
     timestamps: true,
