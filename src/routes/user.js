@@ -3,6 +3,7 @@ const userRouter = express.Router();
 
 const { userAuth } = require("../middleware/auth");
 const ConnectionRequest = require("../models/ConnectionRequest");
+const User = require("../models/user");
 
 const USER_SAFE_DATA = "firstName lastName photoUrl age gender about skills";
 
@@ -51,4 +52,37 @@ userRouter.get("/user/connection", userAuth, async (req, res) => {
   }
 });
 
+userRouter.get("/feed", userAuth, async (req, res) => {
+  try {
+    //User should see all the user cards except
+    // 0. his own card
+    // 1. his connections
+    // 2. ignored people
+    // 3. already send they connection request
+
+    const loggedInUser = req.user;
+
+    // Find all connection requests (send + received)
+    const connectionRequests = await ConnectionRequest.find({
+      $or: [{ fromUserId: loggedInUser._id }, { toUserId: loggedInUser._id }],
+    }).select("fromUserId toUserId");
+
+    const hideUsersFromFeed = new Set(); // set is for only uniqe values add
+    connectionRequests.forEach((row) => {
+      hideUsersFromFeed.add(row.fromUserId.toString());
+      hideUsersFromFeed.add(row.toUserId.toString());
+    });
+
+    const users = await User.find({
+      $and: [
+        { _id: { $nin: Array.from(hideUsersFromFeed) } }, // not in hideUsersFromFeed (in this array) $nin menes not in this arrary
+        { _id: { $ne: loggedInUser._id } }, // not his own card $ne menes not equal to
+      ],
+    }).select(USER_SAFE_DATA);
+
+    res.send(users);
+  } catch (err) {
+    res.status(400).send("ERROR:" + err.message);
+  }
+});
 module.exports = userRouter;

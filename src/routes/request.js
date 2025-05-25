@@ -2,7 +2,7 @@ const expires = require("express");
 const requestRouter = expires.Router();
 
 const { userAuth } = require("../middleware/auth");
-const ConnectionRequest = require("../models/connectionRequest");
+const ConnectionRequest = require("../models/ConnectionRequest");
 const User = require("../models/user");
 
 requestRouter.post(
@@ -49,7 +49,7 @@ requestRouter.post(
       const data = await connectionRequest.save();
 
       res.json({
-        message: req.user.firstName + "is" + status + "in" + toUser.firstName,
+        message: req.user.firstName + " is " + status + " in " + toUser.firstName,
         data,
       });
     } catch (err) {
